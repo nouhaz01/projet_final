@@ -12,6 +12,10 @@ from sklearn.manifold import TSNE
 def dim_red(mat, p, method):
     if method=='ACP':
         pca = PCA(n_components=p)
+        pca_result = pca.fit_transform(mat)
+    elif method=='TSNE':
+        tsne = TSNE(n_components = 3)
+        embedded_data = tsne.fit_transform(embeddings)
         red_mat = pca.fit_transform(mat)
     elif method=='TSNE':
         tsne = TSNE(n_components=p)
@@ -57,4 +61,5 @@ for method in methods:
     ari_score = adjusted_rand_score(pred, labels)
 
     # Print results
+    print(f'Method: {method}\nNMI: {nmi_score:.2f} \nARI: {ari_score:.2f}\n')
     print(f'Method: {method}\nNMI: {nmi_score:.2f} \nARI: {ari_score:.2f}\n')
