@@ -12,7 +12,7 @@ def dim_red(mat, p, method):
         pca_result = pca.fit_transform(mat)
     elif method=='TSNE':
         tsne = TSNE(n_components=p)
-        embedded_data = tsne.fit_transform(embeddings)
+        embedded_data = tsne.fit_transform(mat)
     elif method=='UMAP':
         umap_model = UMAP(n_components=p)
         red_mat = umap_model.fit_transform(mat)    
