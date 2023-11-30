@@ -10,13 +10,14 @@ def dim_red(mat, p, method):
     if method=='ACP':
         pca = PCA(n_components=p)
         pca_result = pca.fit_transform(mat)
-    elif method=='AFC':
-        red_mat = mat[:,:p]
+    elif method=='TSNE':
+        tsne = TSNE(n_components=p)
+        embedded_data = tsne.fit_transform(embeddings)
     elif method=='UMAP':
         umap_model = UMAP(n_components=p)
         red_mat = umap_model.fit_transform(mat)    
     else:
-        raise Exception("Please select one of the three methods : APC, AFC, UMAP")
+        raise Exception("Please select one of the three methods : ACP, TSNE, UMAP")
     return red_mat
 
 
@@ -27,8 +28,12 @@ def clust(mat, k):
 
 # import data
 data = fetch_20newsgroups(subset='all', remove=('headers', 'footers', 'quotes'))
-corpus = data.data[:2000]
-labels = data.target[:2000]
+all_indices = np.arange(len(data.data))
+np.random.shuffle(all_indices)
+selected_indices = all_indices[:2000]
+corpus = [data.data[i] for i in selected_indices]
+labels = [data.target[i] for i in selected_indices]
+train = pd.DataFrame({'Document': corpus_train, 'Category': labels_train})
 k = len(set(labels))
 
 # embedding
@@ -36,7 +41,7 @@ model = SentenceTransformer('paraphrase-MiniLM-L6-v2')
 embeddings = model.encode(corpus)
 
 # Perform dimensionality reduction and clustering for each method
-methods = ['ACP', 'AFC', 'UMAP']
+methods = ['ACP', 'TSNE', 'UMAP']
 for method in methods:
     # Perform dimensionality reduction
     red_emb = dim_red(embeddings, 20, method)
@@ -49,4 +54,4 @@ for method in methods:
     ari_score = adjusted_rand_score(pred, labels)
 
     # Print results
-    print(f'Method: {method}\nNMI: {nmi_score:.2f} \nARI: {ari_score:.2f}\n')from sklearn.datasets import fetch_20newsgroups
+    print(f'Method: {method}\nNMI: {nmi_score:.2f} \nARI: {ari_score:.2f}\n')
