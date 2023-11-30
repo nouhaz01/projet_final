@@ -4,7 +4,10 @@ from sentence_transformers import SentenceTransformer
 import pandas as pd
 import numpy as np
 import matplotlib.pyplot as plt
-
+from sklearn.cluster import KMeans
+from umap import UMAP
+from sklearn.decomposition import PCA
+from sklearn.manifold import TSNE
 
 def dim_red(mat, p, method):
     if method=='ACP':
@@ -13,11 +16,15 @@ def dim_red(mat, p, method):
     elif method=='TSNE':
         tsne = TSNE(n_components = 3)
         embedded_data = tsne.fit_transform(embeddings)
+        red_mat = pca.fit_transform(mat)
+    elif method=='TSNE':
+        tsne = TSNE(n_components=p)
+        red_mat = tsne.fit_transform(embeddings)
     elif method=='UMAP':
         umap_model = UMAP(n_components=p)
         red_mat = umap_model.fit_transform(mat)    
     else:
-        raise Exception("Please select one of the three methods : APC, AFC, UMAP")
+        raise Exception("Please select one of the three methods : ACP, TSNE, UMAP")
     return red_mat
 
 
@@ -28,8 +35,12 @@ def clust(mat, k):
 
 # import data
 data = fetch_20newsgroups(subset='all', remove=('headers', 'footers', 'quotes'))
-corpus = data.data[:2000]
-labels = data.target[:2000]
+all_indices = np.arange(len(data.data))
+np.random.shuffle(all_indices)
+selected_indices = all_indices[:2000]
+corpus = [data.data[i] for i in selected_indices]
+labels = [data.target[i] for i in selected_indices]
+train = pd.DataFrame({'Document': corpus_train, 'Category': labels_train})  
 k = len(set(labels))
 
 # embedding
@@ -37,17 +48,18 @@ model = SentenceTransformer('paraphrase-MiniLM-L6-v2')
 embeddings = model.encode(corpus)
 
 # Perform dimensionality reduction and clustering for each method
-methods = ['ACP', 'AFC', 'UMAP']
+methods = ['ACP', 'TSNE', 'UMAP']
 for method in methods:
     # Perform dimensionality reduction
-    red_emb = dim_red(embeddings, 20, method)
+    red_emb = dim_red(embeddings, 3, method)
 
     # Perform clustering
-    pred = clust(red_emb, k)
+    pred = clust(red_emb, 20)
 
     # Evaluate clustering results
     nmi_score = normalized_mutual_info_score(pred, labels)
     ari_score = adjusted_rand_score(pred, labels)
 
     # Print results
+    print(f'Method: {method}\nNMI: {nmi_score:.2f} \nARI: {ari_score:.2f}\n')
     print(f'Method: {method}\nNMI: {nmi_score:.2f} \nARI: {ari_score:.2f}\n')
