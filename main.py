@@ -12,10 +12,6 @@ from sklearn.manifold import TSNE
 def dim_red(mat, p, method):
     if method=='ACP':
         pca = PCA(n_components=p)
-        pca_result = pca.fit_transform(mat)
-    elif method=='TSNE':
-        tsne = TSNE(n_components = 3)
-        embedded_data = tsne.fit_transform(embeddings)
         red_mat = pca.fit_transform(mat)
     elif method=='TSNE':
         tsne = TSNE(n_components=p)
@@ -34,13 +30,17 @@ def clust(mat, k):
     return pred
 
 # import data
-data = fetch_20newsgroups(subset='all', remove=('headers', 'footers', 'quotes'))
-all_indices = np.arange(len(data.data))
-np.random.shuffle(all_indices)
-selected_indices = all_indices[:2000]
-corpus = [data.data[i] for i in selected_indices]
-labels = [data.target[i] for i in selected_indices]
-train = pd.DataFrame({'Document': corpus_train, 'Category': labels_train})  
+# data = fetch_20newsgroups(subset='all', remove=('headers', 'footers', 'quotes'))
+# all_indices = np.arange(len(data.data))
+# np.random.shuffle(all_indices)
+# selected_indices = all_indices[:2000]
+
+# corpus = [data.data[i] for i in selected_indices]
+# labels = [data.target[i] for i in selected_indices]
+# train = pd.DataFrame({'Document': corpus, 'Category': labels})  
+
+data = pd.read_csv('data.csv')
+
 k = len(set(labels))
 
 # embedding
@@ -61,5 +61,4 @@ for method in methods:
     ari_score = adjusted_rand_score(pred, labels)
 
     # Print results
-    print(f'Method: {method}\nNMI: {nmi_score:.2f} \nARI: {ari_score:.2f}\n')
     print(f'Method: {method}\nNMI: {nmi_score:.2f} \nARI: {ari_score:.2f}\n')
