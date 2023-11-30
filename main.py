@@ -7,6 +7,8 @@ import matplotlib.pyplot as plt
 from sklearn.cluster import KMeans
 from umap import UMAP
 from sklearn.decomposition import PCA
+from sklearn.manifold import TSNE
+
 def dim_red(mat, p, method):
     if method=='ACP':
         pca = PCA(n_components=p)
