@@ -4,15 +4,16 @@ from sentence_transformers import SentenceTransformer
 import pandas as pd
 import numpy as np
 import matplotlib.pyplot as plt
-
-
+from sklearn.cluster import KMeans
+from umap import UMAP
+from sklearn.decomposition import PCA
 def dim_red(mat, p, method):
     if method=='ACP':
         pca = PCA(n_components=p)
-        pca_result = pca.fit_transform(mat)
+        red_mat = pca.fit_transform(mat)
     elif method=='TSNE':
         tsne = TSNE(n_components=p)
-        embedded_data = tsne.fit_transform(mat)
+        red_mat = tsne.fit_transform(embeddings)
     elif method=='UMAP':
         umap_model = UMAP(n_components=p)
         red_mat = umap_model.fit_transform(mat)    
@@ -33,7 +34,7 @@ np.random.shuffle(all_indices)
 selected_indices = all_indices[:2000]
 corpus = [data.data[i] for i in selected_indices]
 labels = [data.target[i] for i in selected_indices]
-train = pd.DataFrame({'Document': corpus_train, 'Category': labels_train})
+train = pd.DataFrame({'Document': corpus_train, 'Category': labels_train})  
 k = len(set(labels))
 
 # embedding
@@ -44,10 +45,10 @@ embeddings = model.encode(corpus)
 methods = ['ACP', 'TSNE', 'UMAP']
 for method in methods:
     # Perform dimensionality reduction
-    red_emb = dim_red(embeddings, 20, method)
+    red_emb = dim_red(embeddings, 3, method)
 
     # Perform clustering
-    pred = clust(red_emb, k)
+    pred = clust(red_emb, 20)
 
     # Evaluate clustering results
     nmi_score = normalized_mutual_info_score(pred, labels)
